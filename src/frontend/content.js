@@ -61,12 +61,6 @@ class MicroPinAnswerer {
         this.togglePins();
       }
       
-      // Manual trigger: Just press J
-      if (e.key === 'j' || e.key === 'J') {
-        console.log('⌨️ Manual trigger detected (J key)');
-        e.preventDefault();
-        this.manualTrigger();
-      }
       
       // Remove pin: Press Escape
       if (e.key === 'Escape') {
