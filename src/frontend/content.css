@@ -1,0 +1,121 @@
+/* Micro-Pin Answerer Content Styles */
+
+.micro-pin {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  font-size: 6px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10000;
+  user-select: none;
+  pointer-events: auto;
+  transition: all 120ms ease-in-out;
+  color: #999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  transform: translateY(-50%); /* Better vertical centering */
+}
+
+.micro-pin:hover {
+  transform: translateY(-50%) scale(1.2);
+  color: #666;
+}
+
+.micro-pin.loading {
+  animation: pulse 1s infinite;
+  color: #007bff;
+}
+
+.micro-pin.correct {
+  color: #28a745;
+}
+
+.micro-pin.incorrect {
+  color: #dc3545;
+}
+
+.micro-pin.error {
+  color: #ffc107;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .micro-pin {
+    transition: none;
+  }
+  
+  .micro-pin:hover {
+    transform: none;
+  }
+  
+  .micro-pin.loading {
+    animation: none;
+  }
+}
+
+/* Ensure pins don't interfere with page layout */
+.micro-pin {
+  position: fixed !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Tooltip styles */
+.micro-pin[title] {
+  position: relative;
+}
+
+.micro-pin[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 8px;
+  top: -8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10001;
+  pointer-events: none;
+}
+
+/* Single Color Dot Styles */
+.micro-pin-dot {
+  position: fixed;
+  bottom: 20px;
+  right: calc(50% + 20px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 10000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid white;
+  transition: all 120ms ease-in-out;
+  opacity: 0.8;
+}
+
+.micro-pin-dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .micro-pin-dot {
+    width: 10px;
+    height: 10px;
+    top: 15px;
+    right: 15px;
+  }
+}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-Pin Answerer Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .question {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .question h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .choices {
+            margin: 15px 0;
+        }
+        .choice {
+            margin: 8px 0;
+            padding: 8px;
+            background-color: white;
+            border-radius: 4px;
+        }
+        .instructions {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .instructions h2 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h2>Micro-Pin Answerer Test Page</h2>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Make sure the Micro-Pin Answerer extension is installed and enabled</li>
+            <li>Press <kbd>Cmd+Shift+P</kbd> (Mac) or <kbd>Ctrl+Shift+P</kbd> (Windows/Linux) to activate the extension</li>
+            <li>Highlight any question below (including the answer choices)</li>
+            <li>Click the tiny pins that appear next to each answer choice</li>
+            <li>Watch the pins turn green (correct) or red (incorrect)</li>
+        </ol>
+    </div>
+
+    <div class="question">
+        <h3>Question 1: Geography</h3>
+        <p>What is the capital city of Australia?</p>
+        <div class="choices">
+            <div class="choice">A) Sydney</div>
+            <div class="choice">B) Melbourne</div>
+            <div class="choice">C) Canberra</div>
+            <div class="choice">D) Perth</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <h3>Question 2: Science</h3>
+        <p>Which planet is known as the "Red Planet"?</p>
+        <div class="choices">
+            <div class="choice">1. Venus</div>
+            <div class="choice">2. Mars</div>
+            <div class="choice">3. Jupiter</div>
+            <div class="choice">4. Saturn</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <h3>Question 3: History</h3>
+        <p>In which year did World War II end?</p>
+        <div class="choices">
+            <div class="choice">• 1944</div>
+            <div class="choice">• 1945</div>
+            <div class="choice">• 1946</div>
+            <div class="choice">• 1947</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <h3>Question 4: Mathematics</h3>
+        <p>What is the value of π (pi) to two decimal places?</p>
+        <div class="choices">
+            <div class="choice">a) 3.14</div>
+            <div class="choice">b) 3.15</div>
+            <div class="choice">c) 3.16</div>
+            <div class="choice">d) 3.17</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <h3>Question 5: Literature</h3>
+        <p>Who wrote the novel "1984"?</p>
+        <div class="choices">
+            <div class="choice">A) George Orwell</div>
+            <div class="choice">B) Aldous Huxley</div>
+            <div class="choice">C) Ray Bradbury</div>
+            <div class="choice">D) H.G. Wells</div>
+        </div>
+    </div>
+
+    <div class="question">
+        <h3>Question 6: Technology</h3>
+        <p>What does HTML stand for?</p>
+        <div class="choices">
+            <div class="choice">1. HyperText Markup Language</div>
+            <div class="choice">2. High Tech Modern Language</div>
+            <div class="choice">3. Home Tool Markup Language</div>
+            <div class="choice">4. Hyperlink and Text Markup Language</div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h2>Expected Results</h2>
+        <ul>
+            <li><strong>Question 1:</strong> C) Canberra ✓</li>
+            <li><strong>Question 2:</strong> 2. Mars ✓</li>
+            <li><strong>Question 3:</strong> • 1945 ✓</li>
+            <li><strong>Question 4:</strong> a) 3.14 ✓</li>
+            <li><strong>Question 5:</strong> A) George Orwell ✓</li>
+            <li><strong>Question 6:</strong> 1. HyperText Markup Language ✓</li>
+        </ul>
+    </div>
+</body>
+</html>
