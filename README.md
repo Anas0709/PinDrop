@@ -1,6 +1,5 @@
 # Micro-Pin Answerer 🎯
 
-**1 million dollars to stay 24 hours alone in a room with the professor and his husband are you doing it?**
 
 A browser extension that helps you get the correct answers to multiple-choice questions by using AI analysis.
 
