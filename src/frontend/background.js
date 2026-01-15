@@ -1,11 +1,11 @@
-// Background service worker for Micro-Pin Answerer
+// Background service worker for AI Study Assistant Overlay
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Micro-Pin Answerer installed');
+  console.log('AI Study Assistant Overlay installed');
 });
 
 // Handle keyboard shortcuts
 chrome.commands.onCommand.addListener((command) => {
-  if (command === 'toggle-pins') {
+  if (command === 'toggle-assistant') {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       chrome.tabs.sendMessage(tabs[0].id, {action: 'togglePins'});
     });

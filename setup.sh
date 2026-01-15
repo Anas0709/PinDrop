@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Micro-Pin Answerer Installation Script
+# AI Study Assistant Overlay Installation Script
 
-echo "🎯 Micro-Pin Answerer Setup"
-echo "=========================="
+echo "📚 AI Study Assistant Overlay Setup"
+echo "===================================="
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
@@ -59,7 +59,7 @@ echo "   - Click 'Load unpacked' and select the src/frontend folder"
 echo ""
 echo "4. Test the extension:"
 echo "   - Open test.html in your browser"
-echo "   - Press Alt+Q to activate"
-echo "   - Highlight a question and click the pins"
+echo "   - Press Cmd+Shift+P (Mac) or Ctrl+Shift+P (Windows/Linux) to activate"
+echo "   - Highlight a study question and click the assistant button"
 echo ""
-echo "Happy learning! 🎓"
+echo "Happy learning! 📚✨"

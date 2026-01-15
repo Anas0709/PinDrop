@@ -1,4 +1,4 @@
-// Popup script for Micro-Pin Answerer
+// Popup script for AI Study Assistant Overlay
 document.addEventListener('DOMContentLoaded', function() {
   const statusElement = document.getElementById('status');
   const activateBtn = document.getElementById('activateBtn');
@@ -9,15 +9,15 @@ document.addEventListener('DOMContentLoaded', function() {
       if (chrome.runtime.lastError) {
         statusElement.textContent = 'Extension Ready';
         statusElement.className = 'status inactive';
-        activateBtn.textContent = 'Activate Extension';
+        activateBtn.textContent = 'Activate Assistant';
       } else if (response && response.active) {
-        statusElement.textContent = 'Pins Active';
+        statusElement.textContent = 'Assistant Active';
         statusElement.className = 'status active';
-        activateBtn.textContent = 'Deactivate Extension';
+        activateBtn.textContent = 'Deactivate Assistant';
       } else {
         statusElement.textContent = 'Extension Ready';
         statusElement.className = 'status inactive';
-        activateBtn.textContent = 'Activate Extension';
+        activateBtn.textContent = 'Activate Assistant';
       }
     });
   });
@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
           console.error('❌ Error:', chrome.runtime.lastError);
         }
         if (response && response.active) {
-          statusElement.textContent = 'Pins Active';
+          statusElement.textContent = 'Assistant Active';
           statusElement.className = 'status active';
-          activateBtn.textContent = 'Deactivate Extension';
+          activateBtn.textContent = 'Deactivate Assistant';
         } else {
           statusElement.textContent = 'Extension Ready';
           statusElement.className = 'status inactive';
-          activateBtn.textContent = 'Activate Extension';
+          activateBtn.textContent = 'Activate Assistant';
         }
       });
     });

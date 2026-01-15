@@ -1,18 +1,18 @@
-// Content script for Micro-Pin Answerer
-class MicroPinAnswerer {
+// Content script for AI Study Assistant Overlay
+class StudyAssistantOverlay {
   constructor() {
-    this.pins = new Map();
+    this.indicators = new Map();
     this.isActive = this.getStoredState(); // Load persisted state
     this.backendUrl = 'http://localhost:3000/api/classify';
     this.cache = new Map();
-    this.justPlacedPin = false; // Flag to prevent immediate removal
+    this.justPlacedIndicator = false; // Flag to prevent immediate removal
     
     this.init();
   }
   
   getStoredState() {
     try {
-      const stored = localStorage.getItem('micro-pin-answerer-active');
+      const stored = localStorage.getItem('study-assistant-active');
       return stored === 'true';
     } catch (error) {
       return false;
@@ -21,14 +21,14 @@ class MicroPinAnswerer {
   
   setStoredState(isActive) {
     try {
-      localStorage.setItem('micro-pin-answerer-active', isActive.toString());
+      localStorage.setItem('study-assistant-active', isActive.toString());
     } catch (error) {
       console.log('❌ Could not save state to localStorage');
     }
   }
   
   init() {
-    console.log('🎯 Micro-Pin Answerer initialized');
+    console.log('📚 AI Study Assistant initialized');
     
     // If extension was active before refresh, reactivate it
     if (this.isActive) {
@@ -43,8 +43,8 @@ class MicroPinAnswerer {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log('📨 Message received:', request);
       if (request.action === 'togglePins') {
-        console.log('🔄 Toggling pins via message');
-        this.togglePins();
+        console.log('🔄 Toggling assistant via message');
+        this.toggleAssistant();
         sendResponse({active: this.isActive});
       } else if (request.action === 'checkStatus') {
         console.log('❓ Status check requested');
@@ -58,13 +58,13 @@ class MicroPinAnswerer {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'P') {
         console.log('⌨️ Keyboard shortcut detected:', e.metaKey ? 'Cmd+Shift+P' : 'Ctrl+Shift+P');
         e.preventDefault();
-        this.togglePins();
+        this.toggleAssistant();
       }
       
       
-      // Remove pin: Press Escape
+      // Remove indicator: Press Escape
       if (e.key === 'Escape') {
-        console.log('⌨️ Escape pressed - removing pin');
+        console.log('⌨️ Escape pressed - removing indicator');
         e.preventDefault();
         this.removeLegend();
       }
@@ -95,11 +95,11 @@ class MicroPinAnswerer {
       }
     });
     
-    // Listen for clicks elsewhere to remove pins
+    // Listen for clicks elsewhere to remove indicators
     document.addEventListener('click', (e) => {
-      // Only remove pins if clicking outside of pins and not the button
+      // Only remove indicators if clicking outside of indicators and not the button
       if (this.isActive && !e.target.classList.contains('micro-pin') && e.target.id !== 'micro-pin-button') {
-        console.log('🖱️ Clicked elsewhere - removing pin');
+        console.log('🖱️ Clicked elsewhere - removing indicator');
         this.removeLegend(); // Remove the colored dot when clicking anywhere else
       }
     });
@@ -109,22 +109,22 @@ class MicroPinAnswerer {
       if (this.isActive) {
         const selection = window.getSelection();
         if (selection.toString().trim().length === 0) {
-          // Check if there's a pin but no selection
+          // Check if there's an indicator but no selection
           const existingDot = document.getElementById('micro-pin-dot');
           if (existingDot) {
-            console.log('🖱️ Mouse moved with no selection - removing pin');
+            console.log('🖱️ Mouse moved with no selection - removing indicator');
             this.removeLegend();
           }
         }
       }
     });
     
-    // Listen for selection changes to remove pins
+    // Listen for selection changes to remove indicators
     document.addEventListener('selectionchange', () => {
       if (this.isActive) {
         const selection = window.getSelection();
         if (selection.toString().trim().length === 0) {
-          console.log('📝 Text unselected - removing pin');
+          console.log('📝 Text unselected - removing indicator');
           setTimeout(() => {
             this.removeLegend(); // Remove the colored dot when text is unselected
           }, 100);
@@ -132,7 +132,7 @@ class MicroPinAnswerer {
       }
     });
     
-    // Listen for scroll to remove pins (but keep the button)
+    // Listen for scroll to remove indicators (but keep the button)
     document.addEventListener('scroll', () => {
       if (this.isActive) {
         this.removeLegend();
@@ -149,17 +149,17 @@ class MicroPinAnswerer {
       }
     });
     
-    // Listen for clicks on pins
+    // Listen for clicks on indicators
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('micro-pin')) {
         e.preventDefault();
         e.stopPropagation();
-        this.handlePinClick(e.target);
+        this.handleIndicatorClick(e.target);
       }
     });
   }
   
-  togglePins() {
+  toggleAssistant() {
     this.isActive = !this.isActive;
     this.setStoredState(this.isActive); // Persist the state
     console.log('🔄 Extension is now:', this.isActive ? 'ACTIVE' : 'INACTIVE');
@@ -172,12 +172,12 @@ class MicroPinAnswerer {
   
   deactivateExtension() {
     console.log('🔌 Deactivating extension - removing everything');
-    this.pins.forEach(pin => {
-      if (pin.parentNode) {
-        pin.parentNode.removeChild(pin);
+    this.indicators.forEach(indicator => {
+      if (indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
       }
     });
-    this.pins.clear();
+    this.indicators.clear();
     this.removeLegend();
     this.removeFloatingButton();
   }
@@ -199,9 +199,9 @@ class MicroPinAnswerer {
       return; // Need at least 2 choices
     }
     
-    console.log('✅ Placing pins for', parsed.choices.length, 'choices');
-    this.removeAllPins();
-    this.placePins(parsed);
+    console.log('✅ Processing study content with', parsed.choices.length, 'options');
+    this.removeAllIndicators();
+    this.placeIndicators(parsed);
   }
   
   parseQuestion(text) {
@@ -311,27 +311,27 @@ class MicroPinAnswerer {
     return { stem, choices, choiceLines, isTrueFalse: false };
   }
   
-  async placePins(parsed) {
+  async placeIndicators(parsed) {
     const selection = window.getSelection();
     if (selection.rangeCount === 0) return;
     
     // Remove any existing legend
     this.removeLegend();
     
-    // Send all choices to backend to find the correct one
+    // Send all choices to backend to get learning guidance
     try {
-      console.log('🔍 Finding correct answer for:', parsed.stem);
-      const correctChoiceIndex = await this.findCorrectAnswer(parsed.stem, parsed.choices);
-      console.log('✅ Correct answer index:', correctChoiceIndex);
+      console.log('🔍 Getting learning guidance for:', parsed.stem);
+      const suggestedChoiceIndex = await this.getStudyResponse(parsed.stem, parsed.choices);
+      console.log('✅ Suggested learning focus index:', suggestedChoiceIndex);
       
-      if (correctChoiceIndex !== -1) {
-        console.log('🎯 Creating color legend for', parsed.choices.length, 'choices');
-        this.createColorLegend(parsed.choices, correctChoiceIndex, parsed.isTrueFalse);
+      if (suggestedChoiceIndex !== -1) {
+        console.log('🎯 Creating learning indicator for', parsed.choices.length, 'options');
+        this.createColorLegend(parsed.choices, suggestedChoiceIndex, parsed.isTrueFalse);
       } else {
-        console.log('❌ No correct answer found');
+        console.log('❌ Could not generate learning guidance');
       }
     } catch (error) {
-      console.error('Error finding correct answer:', error);
+      console.error('Error getting study response:', error);
     }
   }
   
@@ -401,15 +401,15 @@ class MicroPinAnswerer {
     return null;
   }
   
-  createPin(index) {
-    const pin = document.createElement('div');
-    pin.className = 'micro-pin';
-    pin.innerHTML = '●';
-    pin.dataset.index = index;
-    return pin;
+  createIndicator(index) {
+    const indicator = document.createElement('div');
+    indicator.className = 'micro-pin';
+    indicator.innerHTML = '●';
+    indicator.dataset.index = index;
+    return indicator;
   }
   
-  async findCorrectAnswer(stem, choices) {
+  async getStudyResponse(stem, choices) {
     // Check cache first
     const cacheKey = `${stem}|${choices.join('|')}`;
     if (this.cache.has(cacheKey)) {
@@ -433,33 +433,33 @@ class MicroPinAnswerer {
       }
       
       const result = await response.json();
-      const correctIndex = result.correctIndex;
+      const suggestedIndex = result.correctIndex;
       
       // Cache the result
-      this.cache.set(cacheKey, correctIndex);
+      this.cache.set(cacheKey, suggestedIndex);
       
-      return correctIndex;
+      return suggestedIndex;
       
     } catch (error) {
-      console.error('Error finding correct answer:', error);
+      console.error('Error getting study response:', error);
       return -1; // Return -1 if error
     }
   }
 
-  async handlePinClick(pin) {
-    const choiceIndex = parseInt(pin.dataset.choiceIndex);
-    const choiceText = pin.dataset.choiceText;
-    const stem = pin.dataset.stem;
+  async handleIndicatorClick(indicator) {
+    const choiceIndex = parseInt(indicator.dataset.choiceIndex);
+    const choiceText = indicator.dataset.choiceText;
+    const stem = indicator.dataset.stem;
     
     // Check cache first
     const cacheKey = `${stem}|${choiceText}`;
     if (this.cache.has(cacheKey)) {
-      this.updatePinColor(pin, this.cache.get(cacheKey));
+      this.updateIndicatorColor(indicator, this.cache.get(cacheKey));
       return;
     }
     
     // Show loading state
-    pin.classList.add('loading');
+    indicator.classList.add('loading');
     
     try {
       const response = await fetch(this.backendUrl, {
@@ -484,19 +484,19 @@ class MicroPinAnswerer {
       // Cache the result
       this.cache.set(cacheKey, verdict);
       
-      // Update pin color
-      this.updatePinColor(pin, verdict);
+      // Update indicator color
+      this.updateIndicatorColor(indicator, verdict);
       
     } catch (error) {
       console.error('Error calling backend:', error);
-      pin.classList.add('error');
-      pin.title = 'Error: Could not verify answer';
+      indicator.classList.add('error');
+      indicator.title = 'Error: Could not get learning guidance';
     } finally {
-      pin.classList.remove('loading');
+      indicator.classList.remove('loading');
     }
   }
   
-  updatePinColor(pin, verdict) {
+  updateIndicatorColor(indicator, verdict) {
     pin.classList.remove('loading', 'error');
     
     if (verdict === 'correct') {
@@ -508,8 +508,8 @@ class MicroPinAnswerer {
     }
   }
   
-  createColorLegend(choices, correctIndex, isTrueFalse = false) {
-    // Color scheme for answer choices
+  createColorLegend(choices, suggestedIndex, isTrueFalse = false) {
+    // Color scheme for learning indicators
     const colors = [
       '#4CAF50', // Green for A/1
       '#2196F3', // Blue for B/2  
@@ -536,18 +536,18 @@ class MicroPinAnswerer {
     // Determine color based on question type
     let dotColor;
     if (isTrueFalse) {
-      const correctAnswer = choices[correctIndex].toLowerCase();
-      dotColor = trueFalseColors[correctAnswer] || colors[correctIndex];
-      console.log('🎯 True/False question - correct answer:', correctAnswer, 'color:', dotColor);
+      const suggestedAnswer = choices[suggestedIndex].toLowerCase();
+      dotColor = trueFalseColors[suggestedAnswer] || colors[suggestedIndex];
+      console.log('🎯 True/False question - learning focus:', suggestedAnswer, 'color:', dotColor);
     } else {
-      dotColor = colors[correctIndex] || colors[0];
-      console.log('🎯 Multiple choice question - answer index:', correctIndex, 'color:', dotColor);
+      dotColor = colors[suggestedIndex] || colors[0];
+      console.log('🎯 Multiple choice question - learning focus index:', suggestedIndex, 'color:', dotColor);
     }
     
     dot.style.backgroundColor = dotColor;
     
     document.body.appendChild(dot);
-    console.log('✅ Color dot created for answer', correctIndex);
+    console.log('✅ Learning indicator created for option', suggestedIndex);
   }
   
   removeLegend() {
@@ -606,7 +606,7 @@ class MicroPinAnswerer {
       if (this.isActive && !e.target.classList.contains('micro-pin')) {
         const selection = iframeDoc.getSelection();
         if (selection && selection.toString().trim().length === 0) {
-          this.removeAllPins();
+          this.removeAllIndicators();
         }
       }
     });
@@ -625,9 +625,9 @@ class MicroPinAnswerer {
         console.log('🔍 Parsed copied question:', parsed);
         
         if (parsed.choices.length >= 2) {
-          console.log('✅ Processing copied question with', parsed.choices.length, 'choices');
-          this.removeAllPins();
-          this.placePins(parsed);
+          console.log('✅ Processing copied question with', parsed.choices.length, 'options');
+          this.removeAllIndicators();
+          this.placeIndicators(parsed);
         } else {
           console.log('❌ Copied text doesn\'t appear to be a question with multiple choices');
         }
@@ -740,9 +740,9 @@ class MicroPinAnswerer {
       return; // Need at least 2 choices
     }
     
-    console.log('✅ Placing pins for', parsed.choices.length, 'choices');
-    this.removeAllPins();
-    this.placePins(parsed);
+    console.log('✅ Processing study content with', parsed.choices.length, 'options');
+    this.removeAllIndicators();
+    this.placeIndicators(parsed);
   }
   
   addFloatingButton() {
@@ -756,7 +756,7 @@ class MicroPinAnswerer {
     const button = document.createElement('div');
     button.id = 'micro-pin-button';
     button.innerHTML = '';
-    button.title = 'Analyze Selected Text';
+    button.title = 'Get Learning Assistance';
     button.style.cssText = `
       position: fixed;
       bottom: 20px;
@@ -823,18 +823,18 @@ class MicroPinAnswerer {
     }
   }
   
-  removeAllPins() {
-    console.log('🗑️ Removing all pins, count:', this.pins.size);
-    this.pins.forEach(pin => {
-      if (pin.parentNode) {
-        pin.parentNode.removeChild(pin);
+  removeAllIndicators() {
+    console.log('🗑️ Removing all indicators, count:', this.indicators.size);
+    this.indicators.forEach(indicator => {
+      if (indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
       }
     });
-    this.pins.clear();
+    this.indicators.clear();
     this.removeLegend();
     // Don't remove the floating button here - it should stay visible when extension is active
   }
 }
 
 // Initialize the extension
-new MicroPinAnswerer();
+new StudyAssistantOverlay();

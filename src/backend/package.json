@@ -1,7 +1,7 @@
 {
-  "name": "micro-pin-answerer-backend",
+  "name": "study-assistant-overlay-backend",
   "version": "1.0.0",
-  "description": "Backend server for Micro-Pin Answerer browser extension",
+  "description": "Backend server for AI Study Assistant Overlay browser extension",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -21,7 +21,9 @@
     "browser-extension",
     "openai",
     "education",
-    "multiple-choice"
+    "study-assistant",
+    "learning",
+    "ai-tutor"
   ],
   "author": "Anas",
   "license": "MIT"

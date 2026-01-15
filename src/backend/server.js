@@ -18,7 +18,7 @@ app.use(express.json());
 // Cache to avoid duplicate API calls
 const cache = new Map();
 
-// Classification endpoint
+// Learning assistance endpoint
 app.post('/api/classify', async (req, res) => {
   try {
     const { stem, choice, choiceIndex, choices } = req.body;
@@ -37,10 +37,10 @@ app.post('/api/classify', async (req, res) => {
         return res.json({ correctIndex: cache.get(cacheKey) });
       }
       
-      // Prepare the prompt for OpenAI to find the correct answer
+      // Prepare the prompt for OpenAI to provide learning hints and explanations
       const choicesText = choices.map((choice, index) => `${index}: ${choice}`).join('\n');
       
-      const prompt = `You are an expert at evaluating multiple-choice questions. Your task is to identify which answer choice is correct.
+      const prompt = `You are an educational tutor helping a student learn. Your task is to provide hints and explanations to help the student understand the question and work through it themselves.
 
 Question: "${stem}"
 
@@ -49,13 +49,15 @@ ${choicesText}
 
 Instructions:
 - Analyze the question and all answer choices carefully
-- Even if the question seems incomplete or missing context, use your knowledge to determine the most likely correct answer
-- Consider the question type (fill-in-the-blank, multiple choice, etc.)
-- This appears to be an academic/business question - use your knowledge of business, IT, and general academic subjects
-- Determine which choice (by index number) is the correct answer
-- Respond with ONLY the index number (0, 1, 2, 3, etc.) of the correct answer
-- Do not provide explanations, reasoning, or additional text
-- Base your evaluation on factual accuracy and logical consistency
+- Provide learning-focused guidance, not direct answers
+- Help the student understand the concepts involved
+- Consider which choice would be most educational to explain (the correct one, but frame it as a learning opportunity)
+- Focus on the reasoning process and methodology
+- This appears to be an academic/business question - use your knowledge to provide educational context
+- Determine which choice (by index number) would be most beneficial for the student to understand through explanation
+- Respond with ONLY the index number (0, 1, 2, 3, etc.) of the choice that would provide the best learning opportunity
+- Do not provide explanations or reasoning in this response - just the index number
+- Focus on which choice would teach the student the most about the underlying concept
 
 Response:`;
 
@@ -99,19 +101,20 @@ Response:`;
         return res.json({ verdict: cache.get(cacheKey) });
       }
       
-      // Prepare the prompt for OpenAI
-      const prompt = `You are an expert at evaluating multiple-choice questions. Your task is to determine if a given answer choice is correct or incorrect for a question.
+      // Prepare the prompt for OpenAI to provide learning guidance
+      const prompt = `You are an educational tutor. Your task is to help a student learn by providing guidance about an answer choice.
 
 Question: "${stem}"
 
 Answer Choice: "${choice}"
 
 Instructions:
-- Analyze the question and the specific answer choice
-- Determine if this choice is correct or incorrect
-- Respond with ONLY one word: "correct" or "incorrect"
-- Do not provide explanations, reasoning, or additional text
-- Base your evaluation on factual accuracy and logical consistency
+- Analyze the question and the specific answer choice from an educational perspective
+- Help the student understand whether this choice demonstrates correct understanding
+- Focus on learning outcomes, not just correctness
+- Respond with ONLY one word: "correct" if this choice shows good understanding of the concept, or "incorrect" if it doesn't
+- Do not provide explanations or reasoning in this response
+- Base your evaluation on educational value and concept understanding
 
 Response:`;
 
@@ -167,7 +170,7 @@ app.get('/api/health', (req, res) => {
 
 // Start server
 app.listen(port, () => {
-  console.log(`Micro-Pin Answerer backend running on port ${port}`);
+  console.log(`AI Study Assistant backend running on port ${port}`);
   console.log(`Health check: http://localhost:${port}/api/health`);
 });
 
