@@ -1,4 +1,7 @@
-# AI Study Assistant Overlay 📚
+# AI Study Assistant Overlay
+
+![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Chrome Extension (Manifest V3)](https://img.shields.io/badge/Chrome-Extension-blue.svg)
 
 A browser extension that helps students learn by providing AI-generated hints, explanations, and reasoning for study questions. This tool is designed to enhance understanding and learning, not to provide direct answers.
 
@@ -20,6 +23,17 @@ This tool uses GPT-4o to generate educational content that helps you learn and u
 4. **Learn and Understand**: Use the provided information to work through the problem yourself
 
 The extension uses an AI model (GPT-4o) via API to generate educational explanations and hints tailored to the content you've selected.
+
+## Quick Start
+1. From the repo root, run `./setup.sh` (it installs backend deps and creates `src/backend/.env` from `env.example` if missing).
+2. Edit `src/backend/.env` and add your `OPENAI_API_KEY`.
+3. Start the backend server: `cd src/backend && npm start` (default: `http://localhost:3000`).
+4. Load the extension in Chrome:
+   1. Open `chrome://extensions/`
+   2. Enable "Developer mode"
+   3. Click "Load unpacked"
+   4. Select `src/frontend/`
+5. Visit a page with practice questions, highlight the question text/options, then press `Cmd+Shift+P` (Mac) / `Ctrl+Shift+P` (Windows/Linux) to toggle the assistant.
 
 ## Installation and Setup
 
@@ -185,16 +199,23 @@ This project was developed with the assistance of AI coding tools (such as Curso
 
 ```
 Study-Assistant-Overlay/
+├── LICENSE
+├── setup.sh
+├── docs/                 # Architecture + developer notes
 ├── src/
 │   ├── backend/          # Node.js server for AI API integration
 │   └── frontend/         # Chrome extension files
-├── README.md             # This file
+├── .github/              # Issue templates + GitHub Actions
+├── README.md             # Project documentation
+├── CONTRIBUTING.md      # Contribution guidelines
+├── CODE_OF_CONDUCT.md   # Community expectations
+├── SECURITY.md          # Reporting vulnerabilities
 └── .gitignore           # Git ignore rules
 ```
 
 ## License
 
-MIT License - See LICENSE file for details
+Licensed under the MIT License. See [`LICENSE`](./LICENSE) for details.
 
 ---
 

@@ -1,0 +1,21 @@
+name: Security issue
+description: Report a potential security vulnerability
+title: "[Security]: "
+labels: ["security"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not open a public report for security issues.
+        Read `SECURITY.md` and report privately to the maintainers.
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Describe the vulnerability
+      description: Provide a clear description and any reproduction steps.
+    validations:
+      required: true
+

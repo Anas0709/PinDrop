@@ -1,4 +1,7 @@
 #!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # AI Study Assistant Overlay Installation Script
 
@@ -22,7 +25,7 @@ echo "✅ Node.js and npm are installed"
 
 # Install backend dependencies
 echo "📦 Installing backend dependencies..."
-cd src/backend
+cd "$SCRIPT_DIR/src/backend"
 npm install
 
 if [ $? -eq 0 ]; then
@@ -41,8 +44,7 @@ if [ ! -f ".env" ]; then
 else
     echo "✅ Environment file found"
 fi
-
-cd ../..
+cd "$SCRIPT_DIR"
 
 echo ""
 echo "🚀 Setup Complete!"

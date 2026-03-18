@@ -496,15 +496,17 @@ class StudyAssistantOverlay {
     }
   }
   
+  // Updates the clicked indicator's visual state based on backend verdict.
+  // Expects `verdict` to be either "correct" or "incorrect".
   updateIndicatorColor(indicator, verdict) {
-    pin.classList.remove('loading', 'error');
+    indicator.classList.remove('loading', 'error');
     
     if (verdict === 'correct') {
-      pin.classList.add('correct');
-      pin.title = 'Correct';
+      indicator.classList.add('correct');
+      indicator.title = 'Correct';
     } else if (verdict === 'incorrect') {
-      pin.classList.add('incorrect');
-      pin.title = 'Incorrect';
+      indicator.classList.add('incorrect');
+      indicator.title = 'Incorrect';
     }
   }
   
