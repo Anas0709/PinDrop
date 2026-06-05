@@ -1,45 +1,110 @@
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const OpenAI = require('openai');
 require('dotenv').config();
 
+const { validateClassifyPayload } = require('./lib/validation');
+
 const app = express();
 const port = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Cache to avoid duplicate API calls
 const cache = new Map();
 
-// Learning assistance endpoint
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey.trim().length === 0) {
+    const err = new Error('OpenAI API key is not configured');
+    err.statusCode = 503;
+    throw err;
+  }
+  return new OpenAI({ apiKey });
+}
+
+function correlationIdMiddleware(req, res, next) {
+  const incoming = req.headers['x-request-id'];
+  const requestId =
+    typeof incoming === 'string' && incoming.trim().length > 0
+      ? incoming.trim().slice(0, 128)
+      : crypto.randomUUID();
+  req.requestId = requestId;
+  res.setHeader('X-Request-Id', requestId);
+  next();
+}
+
+function trimCache() {
+  if (cache.size > 1000) {
+    const entries = Array.from(cache.entries());
+    cache.clear();
+    entries.slice(-500).forEach(([key, value]) => cache.set(key, value));
+  }
+}
+
+function getReadinessState() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  const openaiConfigured =
+    typeof apiKey === 'string' &&
+    apiKey.trim().length > 0 &&
+    apiKey !== 'your_openai_api_key_here';
+
+  return {
+    status: openaiConfigured ? 'ready' : 'not_ready',
+    checks: {
+      openai_api_key: openaiConfigured,
+    },
+  };
+}
+
+function sendServerError(res, req, err) {
+  console.error(`[${req.requestId}]`, err);
+  res.status(500).json({
+    error: 'Internal server error',
+    requestId: req.requestId,
+    ...(isProduction ? {} : { detail: err.message }),
+  });
+}
+
+app.use(cors());
+app.use(express.json({ limit: '256kb' }));
+app.use(correlationIdMiddleware);
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/ready', (req, res) => {
+  const readiness = getReadinessState();
+  const statusCode = readiness.status === 'ready' ? 200 : 503;
+  res.status(statusCode).json({
+    ...readiness,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.post('/api/classify', async (req, res) => {
   try {
-    const { stem, choice, choiceIndex, choices } = req.body;
-    
-    // Handle new format: find correct answer from all choices
-    if (choices && Array.isArray(choices)) {
-      if (!stem) {
-        return res.status(400).json({ error: 'Missing required field: stem' });
-      }
-      
-      // Create cache key for all choices
+    const validation = validateClassifyPayload(req.body);
+    if (!validation.ok) {
+      return res.status(400).json({
+        error: validation.error,
+        requestId: req.requestId,
+      });
+    }
+
+    const { stem, choice, choices } = req.body;
+
+    if (validation.mode === 'multiple') {
       const cacheKey = `${stem}|${choices.join('|')}`.toLowerCase();
-      
-      // Check cache first
+
       if (cache.has(cacheKey)) {
         return res.json({ correctIndex: cache.get(cacheKey) });
       }
-      
-      // Prepare the prompt for OpenAI to provide learning hints and explanations
-      const choicesText = choices.map((choice, index) => `${index}: ${choice}`).join('\n');
-      
+
+      const choicesText = choices
+        .map((choiceText, index) => `${index}: ${choiceText}`)
+        .join('\n');
+
       const prompt = `You are an educational tutor helping a student learn. Your task is to provide hints and explanations to help the student understand the question and work through it themselves.
 
 Question: "${stem}"
@@ -61,48 +126,31 @@ Instructions:
 
 Response:`;
 
-      // Call OpenAI API
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Upgraded to GPT-4o for better accuracy
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
+      const completion = await getOpenAIClient().chat.completions.create({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: prompt }],
         max_tokens: 10,
-        temperature: 0.0, // Zero temperature for maximum consistency
+        temperature: 0.0,
       });
-      
+
       const response = completion.choices[0].message.content.trim();
-      
-      // Extract the index number
-      const correctIndex = parseInt(response.match(/\d+/)?.[0] || '0');
-      
-      // Validate the index is within range
-      const validIndex = correctIndex >= 0 && correctIndex < choices.length ? correctIndex : 0;
-      
-      // Cache the result
+      const correctIndex = parseInt(response.match(/\d+/)?.[0] || '0', 10);
+      const validIndex =
+        correctIndex >= 0 && correctIndex < choices.length ? correctIndex : 0;
+
       cache.set(cacheKey, validIndex);
-      
-      res.json({ correctIndex: validIndex });
-      
-    } else {
-      // Handle old format: single choice verification
-      if (!stem || !choice) {
-        return res.status(400).json({ error: 'Missing required fields: stem and choice' });
-      }
-      
-      // Create cache key
-      const cacheKey = `${stem}|${choice}`.toLowerCase();
-      
-      // Check cache first
-      if (cache.has(cacheKey)) {
-        return res.json({ verdict: cache.get(cacheKey) });
-      }
-      
-      // Prepare the prompt for OpenAI to provide learning guidance
-      const prompt = `You are an educational tutor. Your task is to help a student learn by providing guidance about an answer choice.
+      trimCache();
+
+      return res.json({ correctIndex: validIndex });
+    }
+
+    const cacheKey = `${stem}|${choice}`.toLowerCase();
+
+    if (cache.has(cacheKey)) {
+      return res.json({ verdict: cache.get(cacheKey) });
+    }
+
+    const prompt = `You are an educational tutor. Your task is to help a student learn by providing guidance about an answer choice.
 
 Question: "${stem}"
 
@@ -118,60 +166,52 @@ Instructions:
 
 Response:`;
 
-      // Call OpenAI API
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o", // Upgraded to GPT-4o for better accuracy
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 10,
-        temperature: 0.0, // Zero temperature for maximum consistency
-      });
-      
-      const response = completion.choices[0].message.content.trim().toLowerCase();
-      
-      // Validate response
-      let verdict;
-      if (response.includes('correct')) {
-        verdict = 'correct';
-      } else if (response.includes('incorrect')) {
-        verdict = 'incorrect';
-      } else {
-        // Fallback if response is unclear
-        verdict = 'incorrect';
-      }
-      
-      // Cache the result
-      cache.set(cacheKey, verdict);
-      
-      res.json({ verdict });
+    const completion = await getOpenAIClient().chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 10,
+      temperature: 0.0,
+    });
+
+    const response = completion.choices[0].message.content.trim().toLowerCase();
+
+    let verdict;
+    if (response.includes('correct')) {
+      verdict = 'correct';
+    } else if (response.includes('incorrect')) {
+      verdict = 'incorrect';
+    } else {
+      verdict = 'incorrect';
     }
-    
-    // Clean up cache periodically (keep last 1000 entries)
-    if (cache.size > 1000) {
-      const entries = Array.from(cache.entries());
-      cache.clear();
-      entries.slice(-500).forEach(([key, value]) => cache.set(key, value));
-    }
-    
+
+    cache.set(cacheKey, verdict);
+    trimCache();
+
+    return res.json({ verdict });
   } catch (error) {
-    console.error('Error in classification:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    if (error.statusCode === 503) {
+      return res.status(503).json({
+        error: 'Service unavailable',
+        requestId: req.requestId,
+      });
+    }
+    sendServerError(res, req, error);
   }
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not found',
+    requestId: req.requestId,
+  });
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`AI Study Assistant backend running on port ${port}`);
-  console.log(`Health check: http://localhost:${port}/api/health`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`AI Study Assistant backend running on port ${port}`);
+    console.log(`Health check: http://localhost:${port}/api/health`);
+    console.log(`Readiness: http://localhost:${port}/api/ready`);
+  });
+}
 
 module.exports = app;

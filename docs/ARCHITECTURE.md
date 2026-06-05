@@ -17,7 +17,10 @@ This repo contains two parts:
 
 - `POST /api/classify`: Returns a choice index (`correctIndex`) for multiple-choice questions.
 - `POST /api/classify` (legacy format): Can return a `verdict` of `correct` / `incorrect` for single-choice checks.
-- `GET /api/health`: Simple health check.
+- `GET /api/health`: Liveness probe (process is up).
+- `GET /api/ready`: Readiness probe (returns 503 if `OPENAI_API_KEY` is missing).
+
+All API responses include an `X-Request-Id` header for request correlation.
 
 ## Key implementation notes
 
