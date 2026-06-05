@@ -1,0 +1,57 @@
+name: Weekly Maintenance
+
+on:
+  schedule:
+    - cron: "0 14 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  maintain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        working-directory: src/backend
+        run: npm ci
+
+      - name: Run weekly maintenance script
+        run: python3 scripts/weekly_maintain.py
+
+      - name: Configure git author
+        run: |
+          git config user.name "Anas Ahmad"
+          git config user.email "anasahmad0709@gmail.com"
+
+      - name: Commit maintenance log
+        run: |
+          git add .github/maintenance-log.md
+          if git diff --staged --quiet; then
+            echo "No maintenance log changes to commit."
+          else
+            git commit -m "chore: weekly maintenance log update" -m "Automated test run and maintenance log entry (Friday schedule)."
+          fi
+
+      - name: Push changes
+        env:
+          MAINTAINER_PAT: ${{ secrets.MAINTAINER_PAT }}
+        run: |
+          if [ -n "$MAINTAINER_PAT" ]; then
+            git push "https://x-access-token:${MAINTAINER_PAT}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+          else
+            git push
+          fi

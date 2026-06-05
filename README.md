@@ -189,6 +189,35 @@ If you encounter issues:
 - **Node.js** installed on your computer (download from [nodejs.org](https://nodejs.org/))
 - **Active internet connection** for API requests
 
+## API endpoints (backend)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/health` | Liveness — process is running |
+| `GET /api/ready` | Readiness — returns `503` if `OPENAI_API_KEY` is not configured |
+| `POST /api/classify` | Learning guidance for selected question content |
+
+Responses include an `X-Request-Id` header for request correlation.
+
+## Weekly maintenance automation
+
+A scheduled GitHub Actions workflow runs **every Friday at 14:00 UTC** (`.github/workflows/weekly-maintenance.yml`):
+
+- Runs backend tests and frontend syntax checks
+- Appends results to [`.github/maintenance-log.md`](.github/maintenance-log.md)
+
+To trigger manually: **Actions → Weekly Maintenance → Run workflow**.
+
+### Attribution on your contribution graph
+
+Pushes from the workflow use **Anas Ahmad** (`anasahmad0709@gmail.com`), not `github-actions[bot]`, when you configure a repository secret:
+
+1. Create a **fine-grained Personal Access Token** with **Contents: Read and write** on this repository only.
+2. Add it as **`MAINTAINER_PAT`** under **Settings → Secrets and variables → Actions**.
+3. Ensure **`anasahmad0709@gmail.com`** is verified on your GitHub account.
+
+Without `MAINTAINER_PAT`, the workflow may still run but pushes may not appear on your contribution graph with your identity.
+
 ## Development Notes
 
 ### AI-Assisted Development
