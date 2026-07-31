@@ -1162,3 +1162,112 @@ PASS
 ```
 PASS
 ```
+
+## 2026-07-31 16:00 UTC
+
+**Overall:** PASS
+
+- **Backend tests (npm ci && npm test):** pass
+
+```
+PASS
+added 143 packages, and audited 144 packages in 1s
+
+25 packages are looking for funding
+  run `npm fund` for details
+
+8 vulnerabilities (2 moderate, 6 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+> study-assistant-overlay-backend@1.0.0 test
+> node --test tests/*.test.js
+
+TAP version 13
+# Subtest: API endpoints
+    # Subtest: GET /api/health returns OK
+    ok 1 - GET /api/health returns OK
+      ---
+      duration_ms: 22.741994
+      ...
+    # Subtest: GET /api/ready returns 503 when OpenAI key is missing
+    ok 2 - GET /api/ready returns 503 when OpenAI key is missing
+      ---
+      duration_ms: 3.694135
+      ...
+    # Subtest: GET /api/ready returns 200 when OpenAI key is configured
+    ok 3 - GET /api/ready returns 200 when OpenAI key is configured
+      ---
+      duration_ms: 2.954062
+      ...
+    # Subtest: POST /api/classify rejects invalid payloads
+    ok 4 - POST /api/classify rejects invalid payloads
+      ---
+      duration_ms: 10.546608
+      ...
+    # Subtest: POST /api/classify rejects missing stem for multiple choice
+    ok 5 - POST /api/classify rejects missing stem for multiple choice
+      ---
+      duration_ms: 3.171518
+      ...
+    # Subtest: echoes X-Request-Id when provided
+    ok 6 - echoes X-Request-Id when provided
+      ---
+      duration_ms: 2.616246
+      ...
+    1..6
+ok 1 - API endpoints
+  ---
+  duration_ms: 47.125604
+  type: 'suite'
+  ...
+# Subtest: server startup
+    # Subtest: listen only when executed directly
+    ok 1 - listen only when executed directly
+      ---
+      duration_ms: 0.131265
+      ...
+    1..1
+ok 2 - server startup
+  ---
+  duration_ms: 0.313111
+  type: 'suite'
+  ...
+1..2
+# tests 7
+# suites 2
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 262.980295
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+```
+
+- **Frontend syntax (content.js):** pass
+
+```
+PASS
+```
+
+- **Frontend syntax (background.js):** pass
+
+```
+PASS
+```
+
+- **Frontend syntax (popup.js):** pass
+
+```
+PASS
+```
+
+- **manifest.json parse:** pass
+
+```
+PASS
+```
